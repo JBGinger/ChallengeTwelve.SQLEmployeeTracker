@@ -162,7 +162,6 @@ function addEmployee() {
     var firstName = "";
     var lastName = "";
     var role = "";
-    var manager = null;
     inquirer.prompt([
         {
             type: 'input',
@@ -220,7 +219,7 @@ function addEmployee() {
                         console.log('Manager ID must be an integer!');
                         return false;
                     }
-                    db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ("${firstName}", "${lastName}", ${role}, ${manager})`, (err) => {
+                    db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ("${firstName}", "${lastName}", ${role}, ${employeeManager})`, (err) => {
                         if (err) {
                             console.log('Error: ' + err.message);
                             return;
