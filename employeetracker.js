@@ -40,40 +40,34 @@ function startQuestions() {
 }
 
 function viewDepartments() {
-    let departments = db.query('SELECT * FROM department', (err, rows) => {
+    db.query('SELECT * FROM department', (err, rows) => {
         if (err) {
             console.log('Error: ' + err.message);
             return;
         }
-        for (let i = 0; i < rows.length; i++) {
-            console.log("\tID: " + rows[i].id + "\tName: " + rows[i].name);
-        }
+        console.table(rows);
         startQuestions();
     });
 }
 
 function viewRoles() {
-    let roles = db.query('SELECT * FROM role', (err, rows) => {
+    db.query('SELECT * FROM role', (err, rows) => {
         if (err) {
             console.log('Error: ' + err.message);
             return;
         }
-        for (let i = 0; i < rows.length; i++) {
-            console.log("\tID: " + rows[i].id + "\tTitle: " + rows[i].title + "\tSalary: " + rows[i].salary + "\tDepartment ID: " + rows[i].department_id);
-        }
+        console.table(rows);
         startQuestions();
     });
 }
 
 function viewEmployees() {
-    let employees = db.query('SELECT * FROM employee', (err, rows) => {
+    db.query('SELECT * FROM employee', (err, rows) => {
         if (err) {
             console.log('Error: ' + err.message);
             return;
         }
-        for (let i = 0; i < rows.length; i++) {
-            console.log("\tID: " + rows[i].id + "\tFirst Name: " + rows[i].first_name + "\tLast Name: " + rows[i].last_name + "\tRole ID: " + rows[i].role_id + "\tManager ID: " + rows[i].manager_id);
-        }
+        console.table(rows);
         startQuestions();
     });
 }
@@ -86,7 +80,7 @@ function addDepartment() {
             message: 'What is the new department name?',
             validate: newDeptName => {
                 if (newDeptName) {
-                    db.query(`INSERT INTO department (name) VALUES ("${newDeptName}")`, (err, rows) => {
+                    db.query(`INSERT INTO department (name) VALUES ("${newDeptName}")`, (err) => {
                         if (err) {
                             console.log('Error: ' + err.message);
                             return;
@@ -146,7 +140,7 @@ function addRole() {
                         console.log('Department ID must be an integer!');
                         return false;
                     }
-                    db.query(`INSERT INTO role (title, salary, department_id) VALUES ("${nameOfRole}", ${salaryAmount}, ${roleDepartment})`, (err, rows) => {
+                    db.query(`INSERT INTO role (title, salary, department_id) VALUES ("${nameOfRole}", ${salaryAmount}, ${roleDepartment})`, (err) => {
                         if (err) {
                             console.log('Error: ' + err.message);
                             return;
@@ -226,7 +220,7 @@ function addEmployee() {
                         console.log('Manager ID must be an integer!');
                         return false;
                     }
-                    db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ("${firstName}", "${lastName}", ${role}, ${manager})`, (err, rows) => {
+                    db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ("${firstName}", "${lastName}", ${role}, ${manager})`, (err) => {
                         if (err) {
                             console.log('Error: ' + err.message);
                             return;
