@@ -30,16 +30,14 @@ function startQuestions() {
             } else if (answer.startprompt == "Add an employee") {
                 addEmployee();
             } else if (answer.startprompt == "Update an employee role") {
-                updateRole();
+                chooseEmployee();
             } else {
-                return;
+                console.log("Finished!");
+                process.exit();
             }
         }
     );
 }
-
-//Ask user what they want to do.
-startQuestions();
 
 function viewDepartments() {
     let departments = db.query('SELECT * FROM department', (err, rows) => {
@@ -101,9 +99,9 @@ function addDepartment() {
                     return false;
                 }
             }
-        }
-    );
-    startQuestions();
+        }).then(() => {
+            startQuestions();
+        });
 }
 
 function addRole() {
@@ -161,9 +159,9 @@ function addRole() {
                     return false;
                 }
             }
-        }
-    ]);
-    startQuestions();
+        }]).then(() => {
+            startQuestions();
+        });
 }
 
 function addEmployee() {
@@ -241,17 +239,99 @@ function addEmployee() {
                     return false;
                 }
             }
-        }
-    ]);
-    startQuestions();
+        }]).then(() => {
+            startQuestions();
+        });
 }
 
-function updateRole() {
-    inquirer.prompt(
+function chooseEmployee() {
+    var employeesArr = [];
+    var empIDArr = [];
+    db.query('SELECT id, first_name, last_name FROM employee', (err, rows) => {
+        if (err)
         {
+            console.log("Error selecting employees.");
+            return;
+        }
+        for (let i = 0; i < rows.length; i++)
+        {
+            employeesArr[i] = rows[i].first_name + ' ' + rows[i].last_name + ' (' + rows[i].id + ')'; // Prevents updating wrong employee if two have same name.
+            empIDArr[i] = rows[i].id;
+        }
+        promptForEmployee(employeesArr, empIDArr);
+    })
+};
+
+function promptForEmployee(employeesArr, empIDArr) {
+    var selEmpID = 0; 
+    inquirer.prompt({
             type: 'list',
             name: 'updateEmployee',
             message: 'Please select employee to update',
+            choices: employeesArr
+    }).then((answer) => {
+        for (let i = 0; i < employeesArr.length; i++)
+        {
+            if (answer.updateEmployee == employeesArr[i])
+            {
+                selEmpID = empIDArr[i];
+                break;
+            }
         }
-    )
+        chooseRole(selEmpID);
+    })
 }
+
+function chooseRole(selEmpID) {
+    if (selEmpID == 0) return;
+    var rolesArr = [];
+    var roleIDArr = [];
+    db.query('SELECT id, title FROM role', (err, rows) => {
+        if (err)
+        {
+            console.log("Error selecting roles.");
+            return;
+        }
+        for (let i = 0; i < rows.length; i++)
+        {
+            rolesArr[i] = rows[i].title + ' (' + rows[i].id + ')'; // Prevents sending wrong role if two have same name.
+            roleIDArr[i] = rows[i].id;
+        }
+        promptForRole(rolesArr, roleIDArr, selEmpID);
+    })
+}
+
+function promptForRole(rolesArr, roleIDArr, selEmpID)
+{
+    var selRoleID = 0;
+    inquirer.prompt({
+        type: 'list',
+        name: 'updateEmployeeRole',
+        message: 'Please select new employee role',
+        choices: rolesArr
+    }).then((answer) => {
+        for (let i = 0; i < rolesArr.length; i++)
+        {
+            if (answer.updateEmployeeRole == rolesArr[i])
+            {
+                selRoleID = roleIDArr[i];
+                break;
+            }
+        }
+        assignRole(selRoleID, selEmpID);
+    })
+};
+
+function assignRole(selRoleID, selEmpID) {
+    console.log(" Role ID: " + selRoleID + " Emp ID: " + selEmpID);
+    db.query(`UPDATE employee SET role_id=? WHERE (id=?)`, [selRoleID, selEmpID], (err, result) => {
+        if (err) {
+            console.log('Error: ' + err.message);
+            return;
+        }
+        console.log("Success! Employee role updated. " + result.affectedRows + " row(s) affected.");
+    });
+    startQuestions();
+}
+
+startQuestions();
